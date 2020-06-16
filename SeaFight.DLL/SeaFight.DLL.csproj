@@ -43,6 +43,7 @@
   <ItemGroup>
     <Compile Include="Entities\AuxiliaryShip.cs" />
     <Compile Include="Entities\Field.cs" />
+    <Compile Include="Entities\GridObjects.cs" />
     <Compile Include="Entities\MixedTypeShip.cs" />
     <Compile Include="Interfaces\IRepair.cs" />
     <Compile Include="Interfaces\IShot.cs" />

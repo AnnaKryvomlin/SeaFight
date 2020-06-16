@@ -9,9 +9,14 @@ namespace SeaFight.DLL.Entities
 {
     public class AuxiliaryShip : Ship, IRepair
     {
-        public AuxiliaryShip(int xStart, int xEnd, int yStart, int yEnd) : base(xStart, xEnd, yStart, yEnd)
+        public AuxiliaryShip(int length) : base(length)
         {
             Name = "Воспомогательный";
+        }
+
+        public AuxiliaryShip(int length, int speed, int abilityRange) : base(length, speed, abilityRange)
+        {
+            Name = "Военный";
         }
 
         public void RepairShip()

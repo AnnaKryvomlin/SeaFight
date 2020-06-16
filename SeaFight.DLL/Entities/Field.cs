@@ -8,15 +8,15 @@ namespace SeaFight.DLL.Entities
 {
     public class Field
     {
-        public Ship[] ships { get; private set; }
+        public GridObject<Ship>[] objectsInField { get; private set; }
         public int[][] FieldSize;
         private double xCenter;
         private double yCenter;
-        private int shipsLimit;
+        private int objectsLimit;
         public delegate void FieldHandler(string message);
         public event FieldHandler Notify;
 
-        public Field(int shipsLimit = 10)
+        public Field(int objectsLimit = 10)
         {
             FieldSize = new int[10][];
             for (int i = 0; i < FieldSize.Length; i++)
@@ -25,11 +25,11 @@ namespace SeaFight.DLL.Entities
             }
 
             xCenter = yCenter = 10 / 2;
-            ships = new Ship[shipsLimit];
-            this.shipsLimit = shipsLimit;
+            objectsInField = new GridObject<Ship>[objectsLimit];
+            this.objectsLimit = objectsLimit;
         }
 
-        public Field(int x, int y, int shipsLimit = 10)
+        public Field(int x, int y, int objectsLimit = 10)
         {
             FieldSize = new int[x][];
             for(int i=0;i < FieldSize.Length; i++)
@@ -39,11 +39,11 @@ namespace SeaFight.DLL.Entities
 
             xCenter = x / 2;
             yCenter = y / 2;
-            ships = new Ship[shipsLimit];
-            this.shipsLimit = shipsLimit;
+            objectsInField = new GridObject<Ship>[objectsLimit];
+            this.objectsLimit = objectsLimit;
         }
 
-        public Field(int[][] field, int shipsLimit = 10)
+        public Field(int[][] field, int objectsLimit = 10)
         {
             FieldSize = field;
             xCenter = field.Length / 2;
@@ -56,57 +56,56 @@ namespace SeaFight.DLL.Entities
                 }
             }
             yCenter = max / 2;
-            ships = new Ship[shipsLimit];
-            this.shipsLimit = shipsLimit;
+            objectsInField = new GridObject<Ship>[objectsLimit];
+            this.objectsLimit = objectsLimit;
         }
-        
-        public Ship this[int xStart, int yStart, int quadrant]
+
+        public GridObject<Ship> this[int xStart, int yStart, int quadrant]
         {
             get
             {
-                for (int i = 0; i < ships.Length; i++)
+                for (int i = 0; i < objectsInField.Length; i++)
                 {
-                    if (ships[i]!=null&&ships[i].Quadrant == quadrant && ships[i].xStart == xStart && ships[i].yStart == yStart)
-                        return ships[i];
+                    if (objectsInField[i] != null && objectsInField[i].xStart == xStart && objectsInField[i].yStart == yStart && FindQuadrant(objectsInField[i]) == quadrant)
+                        return objectsInField[i];
                 }
                 return null;
             }
         }
 
-        public void AddShip(Ship ship)
+
+        public void AddShip(Ship ship, int xStart, int xEnd, int yStart, int yEnd)
         {
+            GridObject<Ship>.CheckLength(ship.Length, xStart, xEnd, yStart, yEnd);
             // If there is no "free space" in the array, we can't create new ship
-            if (!ships.Contains(null))
+            if (!objectsInField.Contains(null))
             {
                 Notify?.Invoke("Список полон. Вы не можете добавить ещё один корабль.");
                 return;
             }
 
-            if (ship.xStart>FieldSize.Length || ship.xEnd>FieldSize.Length || ship.yStart>FieldSize.Length || ship.yEnd>FieldSize.Length)
+            if (xStart>FieldSize.Length || xEnd>FieldSize.Length || yStart>FieldSize.Length || yEnd>FieldSize.Length)
             {
                 Notify?.Invoke("Ваши индексы выходят за границу поля.");
                 return;
             }
 
-            ship.Quadrant = ship.FindQuadrant(xCenter, yCenter);
-            ship.DistanceToCenter=ship.FindDistanceToCenter(xCenter, yCenter);
-
             // Check if we can create a ship
-            for (int i = 0; i < ships.Length; i++)
+            for (int i = 0; i < objectsInField.Length; i++)
             {
-                if (ships[i] == null)
+                if (objectsInField[i] == null)
                     break;
                 int coincidences = 0;
                 // Checking "free" coordinates (x and y)
-                for (int j = ship.xStart; j <= ship.xEnd; j++)
-                    for (int k = ships[i].xStart; k <= ships[i].xEnd; k++)
+                for (int j = xStart; j <= xEnd; j++)
+                    for (int k = objectsInField[i].xStart; k <= objectsInField[i].xEnd; k++)
                     {
                         if (j == k)
                             ++coincidences;
                     }
 
-                for (int j = ship.yStart; j <= ship.yEnd; j++)
-                    for (int k = ships[i].yStart; k <= ships[i].yEnd; k++)
+                for (int j = yStart; j <= yEnd; j++)
+                    for (int k = objectsInField[i].yStart; k <= objectsInField[i].yEnd; k++)
                     {
                         if (j == k)
                             ++coincidences;
@@ -118,12 +117,13 @@ namespace SeaFight.DLL.Entities
                     return;
                 }
             }
+
             // If we can create a ship:
-            for (int i = 0; i < ships.Length; i++)
+            for (int i = 0; i < objectsInField.Length; i++)
             {
-                if (ships[i] == null)
+                if (objectsInField[i] == null)
                 {
-                    ships[i] = ship;
+                    objectsInField[i] = new GridObject<Ship>(ship, xStart, xEnd, yStart, yEnd, xCenter, yCenter);
                     break;
                 }
             }
@@ -133,18 +133,38 @@ namespace SeaFight.DLL.Entities
 
         public void FeildStatus()
         {
-            StringBuilder info=new StringBuilder();
-            Array.Sort(ships);
+            StringBuilder info = new StringBuilder();
+            Array.Sort(objectsInField);
             int number = 1;
-            foreach(Ship s in ships)
+            foreach (GridObject<Ship> s in objectsInField)
             {
                 if (s != null)
                 {
-                    info.AppendLine($"{number}. Корабль с начальными координатами {s.xStart};{s.yStart}, длинной {s.Length}.\nPасстояние от центра поля ({xCenter};{yCenter}) =     {s.DistanceToCenter}.\n Квадрант: {s.Quadrant}");
+                    info.AppendLine($"{number}. Корабль с начальными координатами {s.xStart};{s.yStart}, длинной {s.Object.Length}.\nPасстояние от центра поля ({xCenter};{yCenter}) =     {s.FindDistanceToCenter(xCenter,yCenter)}.\n Квадрант: {FindQuadrant(s)}");
                     ++number;
                 }
             }
             Notify?.Invoke(info.ToString());
         }
+
+        public int FindQuadrant(GridObject<Ship> ship)
+        {
+
+            if (ship.xStart >= xCenter && ship.yStart >= yCenter)
+            {
+                return 1;
+            }
+            else if (ship.xStart < xCenter && ship.yStart >= yCenter)
+            {
+                return 2;
+            }
+            else if (ship.xStart < yCenter && ship.yStart < yCenter)
+            {
+                return 3;
+            }
+            else
+                return 4;
+        }
+
     }
 }

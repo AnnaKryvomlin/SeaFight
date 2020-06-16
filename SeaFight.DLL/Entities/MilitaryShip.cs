@@ -9,7 +9,12 @@ namespace SeaFight.DLL.Entities
 {
     public class MilitaryShip : Ship, IShot
     {
-        public MilitaryShip(int xStart, int xEnd, int yStart, int yEnd) : base(xStart, xEnd, yStart, yEnd)
+        public MilitaryShip(int length) : base(length)
+        {
+            Name = "Военный";
+        }
+
+        public MilitaryShip(int length, int speed, int abilityRange) : base(length, speed, abilityRange)
         {
             Name = "Военный";
         }
