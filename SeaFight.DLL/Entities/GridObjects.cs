@@ -36,8 +36,16 @@ namespace SeaFight.DLL.Entities
    
         public static void CheckLength(int length, int xStart, int xEnd, int yStart, int yEnd)
         {
-            ++xEnd;
-            ++yEnd;
+            if (xStart > xEnd || yStart > yEnd)
+            {
+                ++xStart;
+                ++yStart;
+            }
+            else
+            {
+                ++xEnd;
+                ++yEnd;
+            }
             int calcLength;
             if (Math.Abs(xEnd - xStart) > 1 && Math.Abs(yEnd - yStart) > 1)
             {

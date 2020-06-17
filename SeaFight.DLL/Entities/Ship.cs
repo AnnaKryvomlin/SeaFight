@@ -12,9 +12,9 @@ namespace SeaFight.DLL.Entities
         public string Name { get; protected set; }
         protected int speed;
         protected int abilityRange;
-        static readonly int sizeLimit = 4;
-        static readonly int speedLimit = 1;
-        static readonly int abilityRangeLimit = 2;
+        static readonly int sizeLimit=4;
+        static readonly int speedLimit=3;
+        static readonly int abilityRangeLimit=3;
 
         // The ship should be limited in its size
         public int Length
@@ -69,13 +69,6 @@ namespace SeaFight.DLL.Entities
             {
                 return abilityRange;
             }
-        }
-
-        public Ship(int length)
-        {
-            Length = length;
-            speed = 0;
-            abilityRange = 1;
         }
 
         public Ship(int length, int speed, int abilityRange)

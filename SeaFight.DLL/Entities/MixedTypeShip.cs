@@ -9,10 +9,6 @@ namespace SeaFight.DLL.Entities
 {
     public class MixedTypeShip : Ship, IRepair, IShot
     {
-        public MixedTypeShip(int length) : base( length)
-        {
-            Name = "Смешанный";
-        }
 
         public MixedTypeShip(int length, int speed, int abilityRange) : base(length, speed, abilityRange)
         {
